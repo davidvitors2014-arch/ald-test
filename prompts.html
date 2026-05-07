@@ -133,6 +133,26 @@
     .copy-btn:hover { border-color: var(--green); color: var(--green); }
     .copy-btn.copied { color: var(--green); border-color: var(--green); }
 
+    /* Card com imagem */
+    .prompt-card-media {
+      background: var(--card-bg);
+      border: 1px solid var(--green-dark);
+      border-left: 3px solid var(--green);
+      margin-bottom: 0.8rem;
+      transition: box-shadow 0.2s;
+      overflow: hidden;
+    }
+    .prompt-card-media:hover { box-shadow: 0 0 15px rgba(0,255,65,0.15); }
+    .prompt-card-media img {
+      width: 100%;
+      max-height: 260px;
+      object-fit: cover;
+      display: block;
+      border-bottom: 1px solid var(--green-dark);
+      filter: saturate(0.85) contrast(1.05);
+    }
+    .prompt-card-media .card-body { padding: 1rem 1.2rem; position: relative; }
+
     .divider { border: none; border-top: 1px solid var(--green-dark); margin: 2rem 0; }
 
     .footer { text-align: center; color: var(--green-dark); font-size: 0.75rem; border-top: 1px solid var(--green-dark); padding-top: 1.5rem; letter-spacing: 2px; }
@@ -186,6 +206,15 @@
     <div class="section">
       <div class="section-label">PROMPTS / VIDEO</div>
       <div class="section-title">Gere vídeos com IA</div>
+
+      <div class="prompt-card-media">
+        <img src="/assets/martial-arts.jpg" alt="Cena de Ação — Artes Marciais">
+        <div class="card-body">
+          <div class="prompt-tag"># PROMPT_REAL — CENA DE ACAO ARTES MARCIAIS (Higgsfield)</div>
+          <div class="prompt-text" style="padding-right:4.5rem">Cinematic martial arts confrontation in natural daylight. A shaolin monk wears a traditional chinese kung fu outfit: loose black linen top with frog button closures, textured fabric, long sleeves with subtle white inner cuffs, wide relaxed black pants, lightweight cloth shoes. He stands calm and centered, eyes open, focused and alert, surrounded by multiple hostile shaolin monks in a traditional temple setting. Ultra realistic choreography, grounded camera (subtle handheld + controlled dolly + slow orbit), no exaggerated movements. TIMELINE: (0–2s) Wide establishing shot of a stone courtyard in a shaolin temple, incense smoke, mountains in background, soft daylight. (2–4s) Slow push-in close-up on face. (4–6s) First attack, monk sidesteps minimally. (6–8s) Multiple attackers, shaolin techniques: parries, palm strikes, elbow blocks, sweeps. (8–10s) Brief slow motion: precise dodge and counter. (10–12s) Final sequence, camera slow orbit. STYLE: Ultra realistic, high-end martial arts film realism (Ip Man / The Grandmaster), precise body mechanics, natural pacing.</div>
+          <button class="copy-btn" onclick="copyPrompt(this)">COPIAR</button>
+        </div>
+      </div>
 
       <div class="prompt-card">
         <div class="prompt-tag"># PROMPT_01 — AVATAR FALANTE (Higgsfield)</div>
