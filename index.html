@@ -3,18 +3,458 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ALD Ai Solutions</title>
+  <title>David Santos AI</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+    :root {
+      --green: #00ff41;
+      --green-dim: #00cc33;
+      --green-dark: #003300;
+      --bg: #000000;
+      --card-bg: #050f05;
+    }
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #0a0a0a; color: #fff; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; }
-    h1 { font-size: 2.5rem; letter-spacing: 2px; }
-    p { margin-top: 1rem; color: #888; font-size: 1rem; }
+
+    body {
+      background: var(--bg);
+      color: var(--green);
+      font-family: 'Share Tech Mono', monospace;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* Matrix rain canvas */
+    #matrix-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+      opacity: 0.07;
+      pointer-events: none;
+    }
+
+    /* Scanlines overlay */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.08) 2px,
+        rgba(0,0,0,0.08) 4px
+      );
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .content {
+      position: relative;
+      z-index: 2;
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 2rem 1.2rem 4rem;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      padding: 3rem 0 2rem;
+      border-bottom: 1px solid var(--green-dark);
+      margin-bottom: 2.5rem;
+    }
+
+    .prompt-line {
+      color: var(--green-dim);
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .header h1 {
+      font-size: clamp(1.8rem, 6vw, 2.8rem);
+      letter-spacing: 4px;
+      text-shadow: 0 0 20px var(--green), 0 0 40px var(--green-dim);
+      animation: flicker 6s infinite;
+    }
+
+    .header .tagline {
+      margin-top: 0.8rem;
+      color: var(--green-dim);
+      font-size: 0.9rem;
+      letter-spacing: 2px;
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 10px;
+      height: 1.1em;
+      background: var(--green);
+      margin-left: 4px;
+      vertical-align: middle;
+      animation: blink 1s step-end infinite;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    @keyframes flicker {
+      0%, 95%, 100% { opacity: 1; }
+      96% { opacity: 0.8; }
+      97% { opacity: 1; }
+      98% { opacity: 0.6; }
+      99% { opacity: 1; }
+    }
+
+    /* Section label */
+    .section-label {
+      font-size: 0.75rem;
+      color: var(--green-dim);
+      letter-spacing: 3px;
+      margin-bottom: 1rem;
+    }
+
+    .section-label::before { content: '> '; }
+
+    /* Section title */
+    .section-title {
+      font-size: 1.2rem;
+      letter-spacing: 2px;
+      margin-bottom: 1.5rem;
+      text-shadow: 0 0 10px var(--green);
+    }
+
+    /* Prompt cards */
+    .section {
+      margin-bottom: 3rem;
+    }
+
+    .prompt-card {
+      background: var(--card-bg);
+      border: 1px solid var(--green-dark);
+      border-left: 3px solid var(--green);
+      padding: 1rem 1.2rem;
+      margin-bottom: 0.8rem;
+      position: relative;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .prompt-card:hover {
+      border-color: var(--green);
+      box-shadow: 0 0 15px rgba(0,255,65,0.15);
+    }
+
+    .prompt-card .prompt-tag {
+      font-size: 0.7rem;
+      color: var(--green-dim);
+      margin-bottom: 0.5rem;
+    }
+
+    .prompt-card .prompt-text {
+      font-size: 0.88rem;
+      line-height: 1.6;
+      color: #b0ffb8;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 0.8rem;
+      right: 0.8rem;
+      background: transparent;
+      border: 1px solid var(--green-dark);
+      color: var(--green-dim);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.7rem;
+      padding: 0.2rem 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    .copy-btn.copied {
+      color: var(--green);
+      border-color: var(--green);
+    }
+
+    /* Sell card */
+    .sell-card {
+      background: var(--card-bg);
+      border: 1px solid var(--green);
+      padding: 2rem 1.5rem;
+      text-align: center;
+      box-shadow: 0 0 30px rgba(0,255,65,0.1);
+      margin-bottom: 3rem;
+    }
+
+    .sell-card .sell-title {
+      font-size: 1.3rem;
+      letter-spacing: 2px;
+      text-shadow: 0 0 10px var(--green);
+      margin-bottom: 0.8rem;
+    }
+
+    .sell-card .sell-desc {
+      color: #b0ffb8;
+      font-size: 0.88rem;
+      line-height: 1.7;
+      margin-bottom: 1.5rem;
+    }
+
+    .sell-card .sell-list {
+      list-style: none;
+      margin-bottom: 1.8rem;
+      text-align: left;
+      display: inline-block;
+    }
+
+    .sell-card .sell-list li {
+      font-size: 0.85rem;
+      color: #b0ffb8;
+      padding: 0.2rem 0;
+    }
+
+    .sell-card .sell-list li::before {
+      content: '[+] ';
+      color: var(--green);
+    }
+
+    .cta-btn {
+      display: inline-block;
+      background: var(--green);
+      color: #000;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 1rem;
+      font-weight: bold;
+      letter-spacing: 2px;
+      padding: 0.9rem 2rem;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: box-shadow 0.2s, transform 0.1s;
+    }
+
+    .cta-btn:hover {
+      box-shadow: 0 0 25px rgba(0,255,65,0.6);
+      transform: translateY(-2px);
+    }
+
+    .cta-btn:active {
+      transform: translateY(0);
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      color: var(--green-dark);
+      font-size: 0.75rem;
+      border-top: 1px solid var(--green-dark);
+      padding-top: 1.5rem;
+      letter-spacing: 2px;
+    }
+
+    /* Divider */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--green-dark);
+      margin: 2rem 0;
+    }
+
+    /* Boot animation */
+    .boot-screen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: #000;
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 0.5rem;
+      animation: bootFade 0.4s ease 1.8s forwards;
+    }
+
+    .boot-line {
+      font-family: 'Share Tech Mono', monospace;
+      color: var(--green);
+      font-size: 0.8rem;
+      opacity: 0;
+      animation: bootShow 0.1s ease forwards;
+    }
+
+    .boot-line:nth-child(1) { animation-delay: 0.1s; }
+    .boot-line:nth-child(2) { animation-delay: 0.4s; }
+    .boot-line:nth-child(3) { animation-delay: 0.7s; }
+    .boot-line:nth-child(4) { animation-delay: 1.0s; }
+    .boot-line:nth-child(5) { animation-delay: 1.3s; }
+
+    @keyframes bootShow {
+      to { opacity: 1; }
+    }
+
+    @keyframes bootFade {
+      to { opacity: 0; pointer-events: none; }
+    }
   </style>
 </head>
 <body>
-  <div style="text-align:center">
-    <h1>ALD Ai Solutions</h1>
-    <p>Em breve.</p>
+
+  <!-- Boot screen -->
+  <div class="boot-screen">
+    <div class="boot-line">INITIALIZING DAVID_SANTOS.AI...</div>
+    <div class="boot-line">LOADING AI MODULES........... OK</div>
+    <div class="boot-line">CONNECTING TO MATRIX......... OK</div>
+    <div class="boot-line">DECRYPTING CONTENT........... OK</div>
+    <div class="boot-line">> ACCESS GRANTED_</div>
   </div>
+
+  <!-- Matrix rain -->
+  <canvas id="matrix-canvas"></canvas>
+
+  <div class="content">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="prompt-line">root@davidsantos-ai:~$</div>
+      <h1>DAVID SANTOS<span class="cursor"></span></h1>
+      <div class="tagline">// IA que cria. Conteúdo que vende.</div>
+    </div>
+
+    <!-- Prompts de Imagem -->
+    <div class="section">
+      <div class="section-label">PROMPTS / IMAGEM</div>
+      <div class="section-title">Gere imagens com IA</div>
+
+      <div class="prompt-card">
+        <div class="prompt-tag"># PROMPT_01 — RETRATO PROFISSIONAL</div>
+        <div class="prompt-text">Professional portrait photo of a Brazilian entrepreneur, confident expression, dark studio background, rim lighting, sharp details, shot on Sony A7R, 85mm lens, ultra realistic --ar 4:5</div>
+        <button class="copy-btn" onclick="copyPrompt(this)">COPIAR</button>
+      </div>
+
+      <div class="prompt-card">
+        <div class="prompt-tag"># PROMPT_02 — POST MOTIVACIONAL</div>
+        <div class="prompt-text">Minimalist social media post, dark background with neon green matrix text elements, bold typography, futuristic tech aesthetic, suitable for Instagram feed, 1:1 ratio</div>
+        <button class="copy-btn" onclick="copyPrompt(this)">COPIAR</button>
+      </div>
+
+      <div class="prompt-card">
+        <div class="prompt-tag"># PROMPT_03 — THUMBNAIL YOUTUBE</div>
+        <div class="prompt-text">YouTube thumbnail, dramatic lighting, person looking surprised at camera, bold red and black color scheme, text space on right side, hyper realistic, high contrast, 16:9</div>
+        <button class="copy-btn" onclick="copyPrompt(this)">COPIAR</button>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- Prompts de Vídeo -->
+    <div class="section">
+      <div class="section-label">PROMPTS / VIDEO</div>
+      <div class="section-title">Gere vídeos com IA</div>
+
+      <div class="prompt-card">
+        <div class="prompt-tag"># PROMPT_01 — REEL DE ENTRADA</div>
+        <div class="prompt-text">Cinematic slow motion zoom in on entrepreneur at desk, soft bokeh background, morning golden hour light coming through window, confident and focused, 4K, 6 seconds</div>
+        <button class="copy-btn" onclick="copyPrompt(this)">COPIAR</button>
+      </div>
+
+      <div class="prompt-card">
+        <div class="prompt-tag"># PROMPT_02 — TRANSICAO FUTURISTA</div>
+        <div class="prompt-text">Digital glitch transition effect, green matrix code raining over scene, camera pushing forward through data stream, cyberpunk aesthetic, 3 seconds loop, seamless</div>
+        <button class="copy-btn" onclick="copyPrompt(this)">COPIAR</button>
+      </div>
+
+      <div class="prompt-card">
+        <div class="prompt-tag"># PROMPT_03 — PRODUTO EM DESTAQUE</div>
+        <div class="prompt-text">Product showcase video, item floating on dark background, soft rotating 360 light rig, particles and glow effects, premium luxury feel, 8 seconds, ecommerce style</div>
+        <button class="copy-btn" onclick="copyPrompt(this)">COPIAR</button>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- Venda da Skill -->
+    <div class="section">
+      <div class="section-label">SKILL / CARROSSEL</div>
+      <div class="sell-card">
+        <div class="sell-title">[ SKILL GERADORA DE CARROSSEIS ]</div>
+        <div class="sell-desc">
+          Crie carrosseis profissionais para o Instagram em minutos usando IA.<br>
+          Zero design. Zero agência. Resultados reais.
+        </div>
+        <ul class="sell-list">
+          <li>Estrutura de copy que prende do primeiro slide</li>
+          <li>Prompt pronto para gerar visual no ChatGPT</li>
+          <li>Formato otimizado para alcance orgânico</li>
+          <li>Funciona para qualquer nicho</li>
+        </ul>
+        <a class="cta-btn" href="https://wa.me/447597780115?text=Oi%20David%2C%20quero%20a%20skill%20de%20carrossel!" target="_blank">
+          &gt; QUERO A SKILL_
+        </a>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      © DAVID SANTOS AI // @davidsantos.ai
+    </div>
+
+  </div>
+
+  <script>
+    // Matrix rain
+    const canvas = document.getElementById('matrix-canvas');
+    const ctx = canvas.getContext('2d');
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()アイウエオカキクケコサシスセソ';
+    const fontSize = 14;
+    const cols = Math.floor(canvas.width / fontSize);
+    const drops = Array(cols).fill(1);
+
+    function drawMatrix() {
+      ctx.fillStyle = 'rgba(0,0,0,0.05)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#00ff41';
+      ctx.font = fontSize + 'px monospace';
+
+      drops.forEach((y, i) => {
+        const char = chars[Math.floor(Math.random() * chars.length)];
+        ctx.fillText(char, i * fontSize, y * fontSize);
+        if (y * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+        drops[i]++;
+      });
+    }
+
+    setInterval(drawMatrix, 50);
+
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+
+    // Copy prompt
+    function copyPrompt(btn) {
+      const text = btn.parentElement.querySelector('.prompt-text').innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'COPIADO!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = 'COPIAR';
+          btn.classList.remove('copied');
+        }, 2000);
+      });
+    }
+  </script>
+
 </body>
 </html>
