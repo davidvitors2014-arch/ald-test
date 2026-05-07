@@ -208,6 +208,30 @@
 
     .divider { border: none; border-top: 1px solid var(--orange-dark); margin: 2rem 0; }
 
+    /* Galeria de cards */
+    .gallery-scroll {
+      display: flex;
+      gap: 0.8rem;
+      overflow-x: auto;
+      padding-bottom: 0.8rem;
+      scrollbar-width: thin;
+      scrollbar-color: var(--orange-dark) transparent;
+    }
+    .gallery-scroll::-webkit-scrollbar { height: 4px; }
+    .gallery-scroll::-webkit-scrollbar-thumb { background: var(--orange-dark); border-radius: 2px; }
+    .gallery-scroll img {
+      height: 260px;
+      width: auto;
+      border: 1px solid var(--orange-dark);
+      flex-shrink: 0;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+    }
+    .gallery-scroll img:hover {
+      border-color: var(--orange);
+      box-shadow: 0 0 12px var(--orange-glow);
+    }
+
     .footer { text-align: center; color: var(--orange-dark); font-size: 0.75rem; border-top: 1px solid var(--orange-dark); padding-top: 1.5rem; letter-spacing: 2px; }
   </style>
 </head>
@@ -268,6 +292,22 @@
       <div class="proof-line">Sem precisar de Canva, designer ou agência</div>
       <div class="proof-line">Funciona com ChatGPT gratuito</div>
       <div class="proof-line">Método testado na prática por David Santos</div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- Galeria -->
+    <div class="section">
+      <div class="section-label">EXEMPLO REAL</div>
+      <div class="section-title">Carrossel gerado pela skill.</div>
+      <div class="gallery-scroll">
+        <img src="/assets/carousel-card-01.jpg" alt="Card 1 — Capa">
+        <img src="/assets/carousel-card-02.jpg" alt="Card 2 — Contexto">
+        <img src="/assets/carousel-card-03.jpg" alt="Card 3 — Virada">
+        <img src="/assets/carousel-card-04.jpg" alt="Card 4 — Dados">
+        <img src="/assets/carousel-card-05.jpg" alt="Card 5 — Impacto">
+        <img src="/assets/carousel-card-06.jpg" alt="Card 6 — CTA">
+      </div>
     </div>
 
     <hr class="divider">
