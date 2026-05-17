@@ -4,26 +4,46 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Carousel Generator — David Santos</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
     :root {
-      --orange: #ff7800;
-      --orange-dim: #cc5500;
-      --orange-dark: #331100;
-      --orange-glow: rgba(255,120,0,0.15);
+      --accent: #ff7800;
+      --accent-dim: rgba(255,120,0,0.55);
+      --accent-faint: rgba(255,120,0,0.05);
+      --accent-border: rgba(255,120,0,0.3);
+      --accent-dark: rgba(255,120,0,0.12);
       --bg: #000000;
-      --card-bg: #0a0500;
+      --text: #c0c0c0;
+      --text-bright: #e8e8e8;
+      --text-warm: #ffcf99;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
+    html, body { overflow-x: hidden; }
+
     body {
       background: var(--bg);
-      color: var(--orange);
-      font-family: 'Share Tech Mono', monospace;
-      overflow-x: hidden;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
       min-height: 100vh;
+    }
+
+    .font-terminal { font-family: 'Fira Code', monospace; }
+
+    /* Scan lines */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px);
+      pointer-events: none;
+      z-index: 1;
     }
 
     #matrix-canvas {
@@ -31,31 +51,22 @@
       top: 0; left: 0;
       width: 100%; height: 100%;
       z-index: 0;
-      opacity: 0.08;
+      opacity: 0.06;
       pointer-events: none;
-    }
-
-    body::after {
-      content: '';
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.09) 2px, rgba(0,0,0,0.09) 4px);
-      pointer-events: none;
-      z-index: 1;
     }
 
     .back {
       position: fixed;
       top: 1.2rem;
       left: 1.2rem;
-      font-size: 0.8rem;
-      color: var(--orange-dim);
+      font-family: 'Fira Code', monospace;
+      font-size: 0.78rem;
+      color: var(--accent-dim);
       text-decoration: none;
       z-index: 10;
       transition: color 0.2s;
     }
-    .back:hover { color: var(--orange); }
+    .back:hover { color: var(--accent); }
 
     /* Boot screen */
     .boot-screen {
@@ -69,107 +80,212 @@
       justify-content: center;
       flex-direction: column;
       gap: 0.5rem;
-      animation: bootFade 0.4s ease 1.6s forwards;
+      animation: bootFade 0.4s ease 1.8s forwards;
     }
     .boot-line {
-      font-family: 'Share Tech Mono', monospace;
-      color: var(--orange);
+      font-family: 'Fira Code', monospace;
+      color: var(--accent);
       font-size: 0.8rem;
       opacity: 0;
       animation: bootShow 0.1s ease forwards;
     }
     .boot-line:nth-child(1) { animation-delay: 0.1s; }
-    .boot-line:nth-child(2) { animation-delay: 0.4s; }
-    .boot-line:nth-child(3) { animation-delay: 0.7s; }
-    .boot-line:nth-child(4) { animation-delay: 1.0s; }
+    .boot-line:nth-child(2) { animation-delay: 0.5s; }
+    .boot-line:nth-child(3) { animation-delay: 0.9s; }
+    .boot-line:nth-child(4) { animation-delay: 1.3s; }
     @keyframes bootShow { to { opacity: 1; } }
     @keyframes bootFade { to { opacity: 0; pointer-events: none; } }
 
+    /* Content */
     .content {
       position: relative;
       z-index: 2;
-      max-width: 680px;
+      max-width: 720px;
       margin: 0 auto;
-      padding: 2rem 1.2rem 4rem;
+      padding: 2rem 1.2rem 5rem;
     }
 
-    /* Header */
-    .header {
-      text-align: center;
-      padding: 3rem 0 2.5rem;
-      border-bottom: 1px solid var(--orange-dark);
-      margin-bottom: 2.5rem;
+    /* FadeUp */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { opacity: 0; animation: fadeUp 0.7s ease forwards; }
+    .fade-up-d1 { animation-delay: 0.1s; }
+    .fade-up-d2 { animation-delay: 0.2s; }
+    .fade-up-d3 { animation-delay: 0.3s; }
+    .fade-up-d4 { animation-delay: 0.4s; }
+
+    /* Shimmer CTA button — orange */
+    @keyframes shimmer {
+      0%   { background-position: -200% 0; }
+      100% { background-position:  200% 0; }
+    }
+    .btn-shimmer {
+      background: linear-gradient(110deg, #ff7800 0%, #ff7800 40%, #ffaa55 50%, #ff7800 60%, #ff7800 100%);
+      background-size: 200% 100%;
+      animation: shimmer 3s ease-in-out infinite;
+      box-shadow: 0 0 10px rgba(255,120,0,0.35), 0 0 22px rgba(255,120,0,0.1);
+    }
+    .btn-shimmer:hover {
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 0 22px rgba(255,120,0,0.55), 0 0 44px rgba(255,120,0,0.2);
     }
 
-    .prompt-line { color: var(--orange-dim); font-size: 0.85rem; margin-bottom: 0.5rem; }
-
-    .header h1 {
-      font-size: clamp(1.6rem, 5vw, 2.4rem);
-      letter-spacing: 4px;
-      text-shadow: 0 0 20px var(--orange), 0 0 40px var(--orange-dim);
-      animation: flicker 6s infinite;
-      margin-bottom: 0.8rem;
-    }
-
-    .header .tagline {
-      color: #ffcf99;
-      font-size: 1rem;
-      line-height: 1.6;
-      letter-spacing: 1px;
-      margin-bottom: 0.6rem;
-    }
-
-    .header .subtitle {
-      color: var(--orange-dim);
-      font-size: 0.85rem;
-      line-height: 1.7;
-      margin-bottom: 2rem;
-    }
-
+    /* Cursor blink */
+    @keyframes blink { 50% { opacity: 0; } }
     .cursor {
       display: inline-block;
-      width: 10px; height: 1.1em;
-      background: var(--orange);
+      width: 9px; height: 1em;
+      background: var(--accent);
       margin-left: 4px;
       vertical-align: middle;
       animation: blink 1s step-end infinite;
     }
 
-    @keyframes blink { 50% { opacity: 0; } }
-    @keyframes flicker {
-      0%, 95%, 100% { opacity: 1; }
-      96% { opacity: 0.7; }
-      97% { opacity: 1; }
-      98% { opacity: 0.5; }
-      99% { opacity: 1; }
+    /* Header */
+    .header {
+      text-align: center;
+      padding: 4rem 0 2.5rem;
+      border-bottom: 1px dashed var(--accent-border);
+      margin-bottom: 3rem;
     }
+
+    .header .prompt-line {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.8rem;
+      color: var(--accent-dim);
+      margin-bottom: 1rem;
+    }
+
+    .header h1 {
+      font-family: 'Fira Code', monospace;
+      font-size: clamp(1.6rem, 5vw, 2.4rem);
+      font-weight: 700;
+      letter-spacing: 3px;
+      color: var(--accent);
+      text-shadow: 0 0 20px rgba(255,120,0,0.5), 0 0 40px rgba(255,120,0,0.2);
+      margin-bottom: 0.8rem;
+    }
+
+    .header .tagline {
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-warm);
+      line-height: 1.6;
+      margin-bottom: 0.5rem;
+    }
+
+    .header .subtitle {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.88rem;
+      color: var(--text);
+      line-height: 1.7;
+      margin-bottom: 2rem;
+    }
+
+    /* Hero CTA button */
+    .hero-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      color: #000;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      padding: 0.9rem 2rem;
+      text-decoration: none;
+      border-radius: 2px;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.2s;
+    }
+    .hero-btn svg { width: 18px; height: 18px; fill: #000; flex-shrink: 0; }
 
     /* Section */
-    .section { margin-bottom: 2.5rem; }
-    .section-label { font-size: 0.75rem; color: var(--orange-dim); letter-spacing: 3px; margin-bottom: 1rem; }
-    .section-label::before { content: '> '; }
-    .section-title { font-size: 1.2rem; letter-spacing: 2px; margin-bottom: 1.5rem; text-shadow: 0 0 10px var(--orange); }
+    .section { margin-bottom: 3rem; }
 
-    /* Feature cards */
-    .feature-card {
-      background: var(--card-bg);
-      border: 1px solid var(--orange-dark);
-      border-left: 3px solid var(--orange);
-      padding: 1rem 1.2rem;
+    .section-label {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.7rem;
+      color: var(--accent-dim);
+      letter-spacing: 3px;
       margin-bottom: 0.8rem;
-      transition: box-shadow 0.2s;
     }
-    .feature-card:hover { box-shadow: 0 0 15px var(--orange-glow); }
-    .feature-tag { font-size: 0.7rem; color: var(--orange-dim); margin-bottom: 0.4rem; }
-    .feature-text { font-size: 0.88rem; line-height: 1.7; color: #ffcf99; }
+    .section-label::before { content: '> '; }
 
-    /* Check list */
-    .check-list { list-style: none; margin: 0; padding: 0; }
+    .section-title {
+      font-family: 'Fira Code', monospace;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-shadow: 0 0 10px rgba(255,120,0,0.35);
+      margin-bottom: 1.5rem;
+      letter-spacing: 1px;
+    }
+
+    /* Terminal card — Denderson style (orange) */
+    .terminal-card {
+      background: var(--accent-faint);
+      border: 2px dashed var(--accent-border);
+      box-shadow: 0 0 10px rgba(255,120,0,0.1), 0 0 20px rgba(255,120,0,0.04);
+      margin-bottom: 1rem;
+      transition: box-shadow 0.25s;
+    }
+    .terminal-card:hover {
+      box-shadow: 0 0 20px rgba(255,120,0,0.28), 0 0 40px rgba(255,120,0,0.08);
+    }
+    .terminal-card.highlight {
+      border: 2px dashed var(--accent);
+      box-shadow: 0 0 20px rgba(255,120,0,0.25), 0 0 40px rgba(255,120,0,0.08);
+    }
+
+    /* Terminal window header */
+    .terminal-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-bottom: 1px dashed rgba(255,120,0,0.15);
+      background: rgba(0,0,0,0.45);
+    }
+    .terminal-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .dot-red    { background: #FF5F56; }
+    .dot-yellow { background: #FFBD2E; }
+    .dot-green  { background: #27C93F; }
+    .terminal-file {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.68rem;
+      color: rgba(255,120,0,0.4);
+      margin-left: auto;
+    }
+
+    .card-body { padding: 1rem 1.2rem; }
+
+    .feature-tag {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.68rem;
+      color: var(--accent-dim);
+      margin-bottom: 0.5rem;
+    }
+
+    .feature-text {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.88rem;
+      line-height: 1.7;
+      color: var(--text-warm);
+    }
+
+    /* Checklist */
+    .check-list { list-style: none; }
     .check-list li {
+      font-family: 'Inter', sans-serif;
       font-size: 0.9rem;
-      color: #ffcf99;
+      color: var(--text-warm);
       padding: 0.55rem 0;
-      border-bottom: 1px solid var(--orange-dark);
+      border-bottom: 1px dashed rgba(255,120,0,0.15);
       line-height: 1.5;
     }
     .check-list li:last-child { border-bottom: none; }
@@ -179,122 +295,155 @@
     .compare-table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 0.5rem;
-      font-size: 0.8rem;
+      font-size: 0.82rem;
     }
     .compare-table th {
-      background: var(--orange-dark);
-      color: var(--orange);
+      background: rgba(255,120,0,0.12);
+      color: var(--accent);
+      font-family: 'Fira Code', monospace;
       padding: 0.7rem 0.8rem;
       text-align: left;
       letter-spacing: 1px;
-      border: 1px solid var(--orange-dark);
+      border: 1px dashed var(--accent-border);
+      font-size: 0.72rem;
     }
     .compare-table td {
       padding: 0.65rem 0.8rem;
-      border: 1px solid var(--orange-dark);
-      color: #ffcf99;
+      border: 1px dashed rgba(255,120,0,0.18);
+      color: var(--text-warm);
       vertical-align: top;
       line-height: 1.5;
     }
     .compare-table tr:last-child td {
-      background: #120800;
-      color: var(--orange);
+      background: rgba(255,120,0,0.06);
+      color: var(--accent);
+      font-family: 'Fira Code', monospace;
+      font-size: 0.8rem;
     }
-    .compare-table td:first-child { color: var(--orange-dim); font-size: 0.75rem; }
-
-    /* Highlight card */
-    .highlight-card {
-      background: var(--card-bg);
-      border: 1px solid var(--orange);
-      border-left: 3px solid var(--orange);
-      padding: 1.2rem 1.5rem;
-      box-shadow: 0 0 20px var(--orange-glow);
-      margin-bottom: 0.8rem;
+    .compare-table td:first-child {
+      color: var(--accent-dim);
+      font-family: 'Fira Code', monospace;
+      font-size: 0.75rem;
     }
 
-    /* About */
+    /* About card */
     .about-card {
-      background: var(--card-bg);
-      border: 1px solid var(--orange-dark);
-      border-left: 3px solid var(--orange);
-      padding: 1.2rem 1.5rem;
+      background: var(--accent-faint);
+      border: 2px dashed var(--accent-border);
+      padding: 1.4rem 1.5rem;
     }
-    .about-handle { color: var(--orange); font-size: 0.8rem; margin-bottom: 0.6rem; }
-    .about-text { font-size: 0.88rem; color: #ffcf99; line-height: 1.7; }
+    .about-handle {
+      font-family: 'Fira Code', monospace;
+      color: var(--accent);
+      font-size: 0.82rem;
+      margin-bottom: 0.6rem;
+    }
+    .about-text {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.88rem;
+      color: var(--text-warm);
+      line-height: 1.7;
+    }
 
     /* CTA box */
     .cta-box {
-      background: var(--card-bg);
-      border: 1px solid var(--orange);
-      padding: 2rem 1.5rem;
+      background: var(--accent-faint);
+      border: 2px dashed var(--accent-border);
+      padding: 2.5rem 1.5rem;
       text-align: center;
-      box-shadow: 0 0 30px var(--orange-glow);
+      box-shadow: 0 0 30px rgba(255,120,0,0.12), 0 0 60px rgba(255,120,0,0.04);
       margin-top: 2.5rem;
     }
-    .cta-box .cta-title {
-      font-size: 1.2rem;
-      letter-spacing: 2px;
-      text-shadow: 0 0 10px var(--orange);
-      margin-bottom: 0.8rem;
+    .cta-box .terminal-header {
+      margin: -2.5rem -1.5rem 2rem;
     }
-    .cta-box .cta-desc {
-      font-size: 0.85rem;
-      color: #ffcf99;
-      line-height: 1.7;
-      margin-bottom: 1.8rem;
+    .cta-title {
+      font-family: 'Fira Code', monospace;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-shadow: 0 0 12px rgba(255,120,0,0.4);
+      margin-bottom: 1rem;
+      letter-spacing: 1px;
+    }
+    .cta-desc {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      color: var(--text);
+      line-height: 1.8;
+      margin-bottom: 2rem;
     }
 
+    /* Main CTA button */
     .cta-btn {
       display: inline-flex;
       align-items: center;
       gap: 0.6rem;
-      background: var(--orange);
       color: #000;
-      font-family: 'Share Tech Mono', monospace;
+      font-family: 'Fira Code', monospace;
       font-size: 0.95rem;
-      font-weight: bold;
+      font-weight: 700;
       letter-spacing: 2px;
-      padding: 0.9rem 2rem;
+      padding: 0.95rem 2.2rem;
       text-decoration: none;
-      transition: box-shadow 0.2s, transform 0.1s;
-    }
-    .cta-btn:hover {
-      box-shadow: 0 0 30px rgba(255,120,0,0.6);
-      transform: translateY(-2px);
+      border-radius: 2px;
+      transition: transform 0.15s, box-shadow 0.2s;
     }
     .cta-btn svg { width: 20px; height: 20px; fill: #000; flex-shrink: 0; }
 
-    .cta-btn-secondary {
+    /* Outline CTA */
+    .cta-btn-outline {
       display: inline-flex;
       align-items: center;
       gap: 0.6rem;
       background: transparent;
-      color: var(--orange);
-      border: 1px solid var(--orange);
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 0.95rem;
-      font-weight: bold;
-      letter-spacing: 2px;
-      padding: 0.9rem 2rem;
+      color: var(--accent);
+      border: 1px dashed var(--accent);
+      font-family: 'Fira Code', monospace;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      padding: 0.85rem 1.8rem;
       text-decoration: none;
-      transition: box-shadow 0.2s, transform 0.1s;
+      border-radius: 2px;
+      transition: box-shadow 0.2s, transform 0.15s;
     }
-    .cta-btn-secondary:hover {
-      box-shadow: 0 0 20px var(--orange-glow);
+    .cta-btn-outline:hover {
+      box-shadow: 0 0 18px rgba(255,120,0,0.4);
       transform: translateY(-2px);
     }
-    .cta-btn-secondary svg { width: 20px; height: 20px; fill: var(--orange); flex-shrink: 0; }
+    .cta-btn-outline svg { width: 18px; height: 18px; fill: var(--accent); }
 
-    .cta-sub { margin-top: 0.9rem; font-size: 0.75rem; color: var(--orange-dim); }
+    .cta-sub {
+      margin-top: 1rem;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.72rem;
+      color: var(--accent-dim);
+    }
 
-    .divider { border: none; border-top: 1px solid var(--orange-dark); margin: 2rem 0; }
+    /* Divider */
+    .divider {
+      border: none;
+      border-top: 1px dashed var(--accent-border);
+      margin: 2.5rem 0;
+    }
 
-    .footer { text-align: center; color: var(--orange-dark); font-size: 0.75rem; border-top: 1px solid var(--orange-dark); padding-top: 1.5rem; letter-spacing: 2px; }
+    /* Footer */
+    .footer {
+      text-align: center;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.72rem;
+      color: rgba(255,120,0,0.18);
+      border-top: 1px dashed rgba(255,120,0,0.12);
+      padding-top: 1.5rem;
+      letter-spacing: 2px;
+      margin-top: 2rem;
+    }
   </style>
 </head>
 <body>
 
+  <!-- Boot screen -->
   <div class="boot-screen">
     <div class="boot-line">LOADING CAROUSEL_GENERATOR.exe...</div>
     <div class="boot-line">CONNECTING TO INSTAGRAM_API....... OK</div>
@@ -308,12 +457,18 @@
   <div class="content">
 
     <!-- HERO -->
-    <div class="header">
+    <div class="header fade-up">
+      <div class="terminal-header" style="margin: -4rem -0px 2rem; border-bottom: 1px dashed rgba(255,120,0,0.15);">
+        <span class="terminal-dot dot-red"></span>
+        <span class="terminal-dot dot-yellow"></span>
+        <span class="terminal-dot dot-green"></span>
+        <span class="terminal-file">carousel-generator.sh</span>
+      </div>
       <div class="prompt-line">root@davidsantos-ai:~$ ./carousel-generator.sh</div>
       <h1>CAROUSEL GENERATOR<span class="cursor"></span></h1>
       <div class="tagline">A IA que cria E posta seus carrosséis no Instagram sozinha.</div>
       <div class="subtitle">Você digita o tema. Ela pesquisa, escreve a copy, monta o design, gera a legenda e publica direto no seu feed. Você só aprova.</div>
-      <a class="cta-btn-secondary" href="https://wa.me/447597780115?text=Oi%20David%2C%20quero%20saber%20mais%20sobre%20o%20Carousel%20Generator!" target="_blank">
+      <a class="cta-btn-outline" href="https://wa.me/447597780115?text=Oi%20David%2C%20quero%20saber%20mais%20sobre%20o%20Carousel%20Generator!" target="_blank">
         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
         </svg>
@@ -322,106 +477,159 @@
     </div>
 
     <!-- PROBLEMA -->
-    <div class="section">
+    <div class="section fade-up fade-up-d1">
       <div class="section-label">O PROBLEMA</div>
       <div class="section-title">Quanto tempo você perde fazendo carrossel?</div>
 
-      <div class="feature-card" style="border-left-color: var(--orange-dark);">
-        <div class="feature-text">Pesquisar tema. Escrever copy. Abrir Canva. Mexer em fonte. Montar 8 cards. Pensar na legenda. Escolher hashtags. Postar.<br><br><strong style="color:var(--orange);">2 a 3 horas. Por UM post.</strong></div>
+      <div class="terminal-card">
+        <div class="terminal-header">
+          <span class="terminal-dot dot-red"></span>
+          <span class="terminal-dot dot-yellow"></span>
+          <span class="terminal-dot dot-green"></span>
+          <span class="terminal-file">problema.log</span>
+        </div>
+        <div class="card-body">
+          <div class="feature-text">Pesquisar tema. Escrever copy. Abrir Canva. Mexer em fonte. Montar 8 cards. Pensar na legenda. Escolher hashtags. Postar.<br><br><strong style="color:var(--accent);">2 a 3 horas. Por UM post.</strong></div>
+        </div>
       </div>
 
-      <div class="feature-card">
-        <div class="feature-tag">[CUSTO DE TEMPO]</div>
-        <div class="feature-text">Multiplica por 4 posts na semana. <strong style="color:var(--orange);">12 horas no mês. Quase 2 dias úteis</strong> só montando carrossel.</div>
+      <div class="terminal-card">
+        <div class="terminal-header">
+          <span class="terminal-dot dot-red"></span>
+          <span class="terminal-dot dot-yellow"></span>
+          <span class="terminal-dot dot-green"></span>
+          <span class="terminal-file">custo_tempo.log</span>
+        </div>
+        <div class="card-body">
+          <div class="feature-tag">[CUSTO DE TEMPO]</div>
+          <div class="feature-text">Multiplica por 4 posts na semana. <strong style="color:var(--accent);">12 horas no mês. Quase 2 dias úteis</strong> só montando carrossel.</div>
+        </div>
       </div>
 
-      <div class="feature-card">
-        <div class="feature-tag">[CUSTO DE DINHEIRO]</div>
-        <div class="feature-text">E se você tenta terceirizar, designer cobra <strong style="color:var(--orange);">R$ 150 a R$ 500 por carrossel</strong>. Faz a conta: R$ 600 a R$ 2.000 por mês. Sem garantia que vai performar.</div>
+      <div class="terminal-card">
+        <div class="terminal-header">
+          <span class="terminal-dot dot-red"></span>
+          <span class="terminal-dot dot-yellow"></span>
+          <span class="terminal-dot dot-green"></span>
+          <span class="terminal-file">custo_dinheiro.log</span>
+        </div>
+        <div class="card-body">
+          <div class="feature-tag">[CUSTO DE DINHEIRO]</div>
+          <div class="feature-text">E se você tenta terceirizar, designer cobra <strong style="color:var(--accent);">R$ 150 a R$ 500 por carrossel</strong>. Faz a conta: R$ 600 a R$ 2.000 por mês. Sem garantia que vai performar.</div>
+        </div>
       </div>
 
-      <div class="feature-card" style="border-color: var(--orange); box-shadow: 0 0 12px var(--orange-glow);">
-        <div class="feature-tag">[RESULTADO]</div>
-        <div class="feature-text">O resultado todo mundo já viveu: você posta pouco, posta tarde, ou para de postar. E vê seus concorrentes crescerem na sua frente.</div>
+      <div class="terminal-card highlight">
+        <div class="terminal-header">
+          <span class="terminal-dot dot-red"></span>
+          <span class="terminal-dot dot-yellow"></span>
+          <span class="terminal-dot dot-green"></span>
+          <span class="terminal-file">resultado.log</span>
+        </div>
+        <div class="card-body">
+          <div class="feature-tag">[RESULTADO]</div>
+          <div class="feature-text">O resultado todo mundo já viveu: você posta pouco, posta tarde, ou para de postar. E vê seus concorrentes crescerem na sua frente.</div>
+        </div>
       </div>
     </div>
 
     <hr class="divider">
 
-    <!-- SOLUÇÃO -->
-    <div class="section">
+    <!-- SOLUCAO -->
+    <div class="section fade-up fade-up-d2">
       <div class="section-label">A SOLUCAO</div>
       <div class="section-title">Carousel Generator faz tudo. Inclusive postar.</div>
 
-      <div class="feature-card" style="margin-bottom:1.2rem;">
-        <div class="feature-text">Você pede o tema. A IA executa o ciclo completo:</div>
+      <div class="terminal-card">
+        <div class="terminal-header">
+          <span class="terminal-dot dot-red"></span>
+          <span class="terminal-dot dot-yellow"></span>
+          <span class="terminal-dot dot-green"></span>
+          <span class="terminal-file">solucao.sh</span>
+        </div>
+        <div class="card-body">
+          <div class="feature-text" style="margin-bottom:1rem;">Você pede o tema. A IA executa o ciclo completo:</div>
+          <ul class="check-list">
+            <li>Pesquisa o conteúdo atualizado</li>
+            <li>Escreve a copy com gancho, contexto, entrega e CTA</li>
+            <li>Monta o design profissional pronto para o feed</li>
+            <li>Gera a legenda otimizada</li>
+            <li>Publica direto no seu Instagram</li>
+          </ul>
+        </div>
       </div>
 
-      <div class="highlight-card">
-        <ul class="check-list">
-          <li>Pesquisa o conteúdo atualizado</li>
-          <li>Escreve a copy com gancho, contexto, entrega e CTA</li>
-          <li>Monta o design profissional pronto para o feed</li>
-          <li>Gera a legenda otimizada</li>
-          <li>Publica direto no seu Instagram</li>
-        </ul>
-      </div>
-
-      <div class="feature-card" style="margin-top:1rem;">
-        <div class="feature-text">Você só aprova. Acabou.<br><br>Quantos carrosséis quiser. Sem limite de criatividade. Sem designer caro. Sem Canva.</div>
+      <div class="terminal-card" style="margin-top:0.5rem;">
+        <div class="terminal-header">
+          <span class="terminal-dot dot-red"></span>
+          <span class="terminal-dot dot-yellow"></span>
+          <span class="terminal-dot dot-green"></span>
+        </div>
+        <div class="card-body">
+          <div class="feature-text">Você só aprova. Acabou.<br><br>Quantos carrosséis quiser. Sem limite de criatividade. Sem designer caro. Sem Canva.</div>
+        </div>
       </div>
     </div>
 
     <hr class="divider">
 
-    <!-- COMPARAÇÃO -->
-    <div class="section">
+    <!-- COMPARATIVO -->
+    <div class="section fade-up fade-up-d3">
       <div class="section-label">COMPARATIVO</div>
       <div class="section-title">Por que faz sentido mudar agora.</div>
 
-      <table class="compare-table">
-        <thead>
-          <tr>
-            <th></th>
-            <th>TEMPO</th>
-            <th>CUSTO</th>
-            <th>QUEM POSTA</th>
-            <th>LIMITE</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Manual no Canva</td>
-            <td>2–3h por post</td>
-            <td>Sua hora</td>
-            <td>Você</td>
-            <td>Sua paciência</td>
-          </tr>
-          <tr>
-            <td>Designer freelancer</td>
-            <td>2–5 dias de espera</td>
-            <td>R$ 150–500/post</td>
-            <td>Você</td>
-            <td>Seu orçamento</td>
-          </tr>
-          <tr>
-            <td>Carousel Generator</td>
-            <td>Minutos por post</td>
-            <td>Sem custo por unidade</td>
-            <td>A IA</td>
-            <td>Ilimitado</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="terminal-card">
+        <div class="terminal-header">
+          <span class="terminal-dot dot-red"></span>
+          <span class="terminal-dot dot-yellow"></span>
+          <span class="terminal-dot dot-green"></span>
+          <span class="terminal-file">comparativo.csv</span>
+        </div>
+        <div class="card-body" style="padding:0; overflow-x:auto;">
+          <table class="compare-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>TEMPO</th>
+                <th>CUSTO</th>
+                <th>QUEM POSTA</th>
+                <th>LIMITE</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Manual no Canva</td>
+                <td>2–3h por post</td>
+                <td>Sua hora</td>
+                <td>Você</td>
+                <td>Sua paciência</td>
+              </tr>
+              <tr>
+                <td>Designer freelancer</td>
+                <td>2–5 dias de espera</td>
+                <td>R$ 150–500/post</td>
+                <td>Você</td>
+                <td>Seu orçamento</td>
+              </tr>
+              <tr>
+                <td>Carousel Generator</td>
+                <td>Minutos por post</td>
+                <td>Sem custo por unidade</td>
+                <td>A IA</td>
+                <td>Ilimitado</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
     <hr class="divider">
 
-    <!-- SOBRE -->
-    <div class="section">
+    <!-- QUEM CRIOU -->
+    <div class="section fade-up fade-up-d4">
       <div class="section-label">QUEM CRIOU</div>
       <div class="section-title">David Santos</div>
-
       <div class="about-card">
         <div class="about-handle">> @davidsantos.ai</div>
         <div class="about-text">Vivo de IA, automação e conteúdo. Construí o Carousel Generator porque eu mesmo precisava parar de perder horas montando post. Hoje uso todo dia no meu Instagram — e estou liberando pra quem entendeu que IA não é o futuro, é o agora.</div>
@@ -431,32 +639,38 @@
     <hr class="divider">
 
     <!-- CTA FINAL -->
-    <div class="cta-box">
-      <div class="cta-title">[ PARE DE PRODUZIR CONTEÚDO MANUALMENTE EM 2026 ]</div>
-      <div class="cta-desc">
-        Quem posta consistente cresce. Quem trava some.<br>
-        A diferença não é talento — é ferramenta.<br><br>
-        Clique abaixo, fale comigo no WhatsApp e descubra como liberar seu acesso.
+    <div class="cta-box fade-up">
+      <div class="terminal-header">
+        <span class="terminal-dot dot-red"></span>
+        <span class="terminal-dot dot-yellow"></span>
+        <span class="terminal-dot dot-green"></span>
+        <span class="terminal-file">cta_final.sh</span>
       </div>
-      <a class="cta-btn" href="https://wa.me/447597780115?text=Oi%20David%2C%20quero%20meu%20acesso%20ao%20Carousel%20Generator!" target="_blank">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-        </svg>
-        &gt; QUERO MEU ACESSO AGORA_
-      </a>
-      <div class="cta-sub">Tire suas dúvidas direto comigo. Respondo pessoalmente.</div>
+      <div style="padding-top:1.5rem;">
+        <div class="cta-title">[ PARE DE PRODUZIR CONTEÚDO MANUALMENTE EM 2026 ]</div>
+        <div class="cta-desc">
+          Quem posta consistente cresce. Quem trava some.<br>
+          A diferença não é talento — é ferramenta.<br><br>
+          Clique abaixo, fale comigo no WhatsApp e descubra como liberar seu acesso.
+        </div>
+        <a class="cta-btn btn-shimmer" href="https://pay.kiwify.com.br/pQ6SMXb" target="_blank">
+          &gt; QUERO MEU ACESSO AGORA_
+        </a>
+        <div class="cta-sub">Tire suas dúvidas direto comigo. Respondo pessoalmente.</div>
+      </div>
     </div>
 
-    <div class="footer" style="margin-top:2rem;">© DAVID SANTOS AI // @davidsantos.ai</div>
+    <div class="footer">© DAVID SANTOS AI // @davidsantos.ai</div>
 
   </div>
 
   <script>
+    // Matrix canvas (orange)
     const canvas = document.getElementById('matrix-canvas');
     const ctx = canvas.getContext('2d');
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()アイウエオカキクケコ';
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()アイウエオ';
     const fontSize = 14;
     const cols = Math.floor(canvas.width / fontSize);
     const drops = Array(cols).fill(1);
@@ -471,8 +685,17 @@
         drops[i]++;
       });
     }
-    setInterval(draw, 50);
+    setInterval(draw, 55);
     window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+
+    // FadeUp observer
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.style.animationPlayState = 'running'; obs.unobserve(e.target); } });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('.fade-up').forEach(el => {
+      el.style.animationPlayState = 'paused';
+      obs.observe(el);
+    });
   </script>
 </body>
 </html>
