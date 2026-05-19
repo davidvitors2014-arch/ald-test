@@ -131,6 +131,22 @@
       transform: translateY(-2px) scale(1.03);
       box-shadow: 0 0 22px rgba(255,120,0,0.55), 0 0 44px rgba(255,120,0,0.2);
     }
+    /* Shimmer CTA button — red (right to left) */
+    @keyframes shimmer-red {
+      0%   { background-position:  200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    .btn-shimmer-red {
+      background: linear-gradient(110deg, #e51c1c 0%, #e51c1c 40%, #ff6060 50%, #e51c1c 60%, #e51c1c 100%);
+      background-size: 200% 100%;
+      animation: shimmer-red 3s ease-in-out infinite;
+      box-shadow: 0 0 10px rgba(220,30,30,0.45), 0 0 22px rgba(220,30,30,0.15);
+      color: #fff;
+    }
+    .btn-shimmer-red:hover {
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 0 22px rgba(220,30,30,0.65), 0 0 44px rgba(220,30,30,0.25);
+    }
 
     /* Cursor blink */
     @keyframes blink { 50% { opacity: 0; } }
@@ -705,7 +721,7 @@
           <a class="cta-btn btn-shimmer" href="https://pay.kiwify.com.br/pQ6SMXb" target="_blank" style="justify-content:center;">
             &gt; QUERO MEU ACESSO AGORA_
           </a>
-          <a href="https://pay.kiwify.com.br/cxisUMP" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:0.6rem;background:linear-gradient(135deg,#c0392b,#8e0000);color:#fff;font-family:'Fira Code',monospace;font-size:0.95rem;font-weight:700;letter-spacing:2px;padding:0.95rem 2.2rem;text-decoration:none;border-radius:2px;transition:transform 0.15s,box-shadow 0.2s;box-shadow:0 0 18px rgba(180,0,0,0.35);">
+          <a class="cta-btn btn-shimmer-red" href="https://pay.kiwify.com.br/cxisUMP" target="_blank" style="justify-content:center;">
             &gt; QUERO A VERSÃO PRO_
           </a>
         </div>
